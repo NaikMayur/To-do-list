@@ -1,7 +1,12 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import Navbar from "@/components/Navbar";
+import { ThemeProvider } from "@mui/material";
+import theme from "@/styles/theme";
+import { AppRouterCacheProvider } from "@mui/material-nextjs/v13-appRouter";
 
+import Providers from "./redux/providers";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
@@ -16,7 +21,16 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={inter.className}>{children}</body>
+      <body className={inter.className}>
+        <Providers>
+          <AppRouterCacheProvider>
+            <ThemeProvider theme={theme}>
+              <Navbar />
+              {children}
+            </ThemeProvider>
+          </AppRouterCacheProvider>
+        </Providers>
+      </body>
     </html>
   );
 }

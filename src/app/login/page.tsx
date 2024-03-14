@@ -13,6 +13,14 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import { login } from "../redux/slices/authSlice";
 import { RootState } from "../redux/store";
+import { makeStyles } from "@mui/styles";
+
+const useStyles = makeStyles({
+  container: {
+    marginTop: "5rem",
+    alignItems: "center",
+  },
+});
 
 interface LoginFormInputs {
   username: string;
@@ -20,6 +28,7 @@ interface LoginFormInputs {
 }
 
 const Login: React.FC = () => {
+  const classes = useStyles();
   const {
     register,
     handleSubmit,
@@ -28,13 +37,12 @@ const Login: React.FC = () => {
   const dispatch = useDispatch();
   const onSubmit: SubmitHandler<LoginFormInputs> = (data) => {
     dispatch(login(data));
-    console.log(data); // Handle form submission logic here
+    console.log(data);
   };
   const getName = useSelector((state: RootState) => state.auth.user);
 
   return (
-    <Container component="main" maxWidth="xs">
-      {getName && getName.username}
+    <Container component="main" maxWidth="xs" className={classes.container}>
       <Paper
         elevation={3}
         sx={{
@@ -83,6 +91,10 @@ const Login: React.FC = () => {
           </Button>
         </Box>
       </Paper>
+      <Typography variant="caption">
+        {getName?.username &&
+          `Hi, ${getName?.username} you will be logged in shortly!`}
+      </Typography>
     </Container>
   );
 };

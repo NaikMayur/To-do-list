@@ -1,3 +1,4 @@
+"use client";
 import React, { useEffect, useState } from "react";
 import Grid from "@mui/material/Grid";
 import Card from "@mui/material/Card";
@@ -5,6 +6,11 @@ import CardContent from "@mui/material/CardContent";
 import Typography from "@mui/material/Typography";
 import { makeStyles } from "@mui/styles";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
+import { Button, List, ListItem } from "@mui/material";
+import { useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
+import { decrement, increment } from "@/app/redux/slices/todoSlice";
+import Image from "next/image";
 
 interface Data {
   id: number;
@@ -30,9 +36,12 @@ const useStyles = makeStyles({
 
 const TodoPage = () => {
   const classes = useStyles();
-
+  const dispatch = useDispatch();
   const [data, setData] = useState<Data[]>([]);
-
+  const [apiData, setApiData] = useState<any>(null);
+  const number = useSelector((state: any) => {
+    return state.todo.number;
+  });
   useEffect(() => {
     const initialData = [
       { id: 1, title: "Task 1", content: "Complete this task first." },
@@ -44,6 +53,10 @@ const TodoPage = () => {
       },
     ];
     setData(initialData);
+
+    fetch("https://dummyjson.com/products")
+      .then((res) => res.json())
+      .then((res) => setApiData(res));
   }, []);
 
   const onDragEnd = (result: any) => {
@@ -56,53 +69,78 @@ const TodoPage = () => {
 
     setData(newData);
   };
-
+  function add() {
+    dispatch(increment());
+  }
+  function subtract() {
+    dispatch(decrement());
+  }
+  console.log(apiData);
   return (
-    <DragDropContext onDragEnd={onDragEnd}>
-      <Grid
-        container
-        spacing={2}
-        sx={{ marginTop: "5rem" }}
-        justifyContent="center"
-      >
-        <Droppable droppableId="todo">
-          {(provided) => (
-            <Grid item ref={provided.innerRef} {...provided.droppableProps}>
-              {data.map((item, index) => (
-                <Draggable
-                  key={item.id}
-                  draggableId={String(item.id)}
-                  index={index}
-                >
-                  {(provided) => (
-                    <div
-                      ref={provided.innerRef}
-                      {...provided.draggableProps}
-                      {...provided.dragHandleProps}
-                    >
-                      <Card key={item.id} className={classes.card}>
-                        <CardContent>
-                          <Typography
-                            variant="body2"
-                            className={classes.cardTitle}
-                          >
-                            {item.title}
-                          </Typography>
-                          <Typography variant="body2" color="text.secondary">
-                            {item.content}
-                          </Typography>
-                        </CardContent>
-                      </Card>
-                    </div>
-                  )}
-                </Draggable>
-              ))}
-              {provided.placeholder}
-            </Grid>
-          )}
-        </Droppable>
+    <>
+      <DragDropContext onDragEnd={onDragEnd}>
+        <Grid
+          container
+          spacing={2}
+          sx={{ marginTop: "5rem" }}
+          justifyContent="center"
+        >
+          <Droppable droppableId="todo">
+            {(provided) => (
+              <Grid item ref={provided.innerRef} {...provided.droppableProps}>
+                {data.map((item, index) => (
+                  <Draggable
+                    key={item.id}
+                    draggableId={String(item.id)}
+                    index={index}
+                  >
+                    {(provided) => (
+                      <div
+                        ref={provided.innerRef}
+                        {...provided.draggableProps}
+                        {...provided.dragHandleProps}
+                      >
+                        <Card key={item.id} className={classes.card}>
+                          <CardContent>
+                            <Typography
+                              variant="body2"
+                              className={classes.cardTitle}
+                            >
+                              {item.title}
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary">
+                              {item.content}
+                            </Typography>
+                            <Button onClick={add}>+</Button>
+                            <Typography>{number <= 0 ? 0 : number}</Typography>
+                            <Button onClick={subtract}>-</Button>
+                          </CardContent>
+                        </Card>
+                      </div>
+                    )}
+                  </Draggable>
+                ))}
+                {provided.placeholder}
+              </Grid>
+            )}
+          </Droppable>
+        </Grid>
+      </DragDropContext>
+      <Grid container>
+        {apiData && (
+          <List>
+            {apiData.products.map((data: any) => (
+              <div>
+                <ListItem>{data.title}</ListItem>
+                {data.images.map((img: any) => (
+                  <Image src={img} alt="image" width={50} height={50} />
+                ))}
+              </div>
+            ))}
+          </List>
+        )}
       </Grid>
-    </DragDropContext>
+    </>
   );
 };
 
